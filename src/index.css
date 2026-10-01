@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-base text-white antialiased selection:bg-accent selection:text-white;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+}
