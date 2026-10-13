@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base styles for the dark theme consistency */
+/* Base styles for the dark theme consistency /
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -10,16 +10,36 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0B1120;
+  background-color: #050505;
   color: #ffffff;
 }
 
-/* Custom utility to hide scrollbar for the horizontal scrolling container */
+/ Custom utility to hide scrollbar for the horizontal scrolling container /
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  / IE and Edge /
+  scrollbar-width: none;  / Firefox /
 }
 
 .hide-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+  display: none; / Chrome, Safari and Opera /
+}
+
+/ Neo-brutalist chunky scrollbar for the project carousel */
+.brutal-scroll {
+  scrollbar-width: auto;
+  scrollbar-color: #ff3333 #111111;
+}
+.brutal-scroll::-webkit-scrollbar {
+  height: 16px;
+}
+.brutal-scroll::-webkit-scrollbar-track {
+  background: #111111;
+  border-top: 4px solid #ffffff;
+}
+.brutal-scroll::-webkit-scrollbar-thumb {
+  background: #ff3333;
+  border: 4px solid #ffffff;
+}
+.brutal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #ffffff;
 }

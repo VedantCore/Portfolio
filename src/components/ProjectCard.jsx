@@ -1,49 +1,52 @@
 // src/components/ProjectCard.jsx
 import React from 'react';
+import { Play } from 'lucide-react';
 
-const ProjectCard = ({ project, onClick }) => {
+const ProjectCard = ({ project, onClick, index = 1 }) => {
   return (
-    <div 
+    <button
       onClick={onClick}
-      className="relative w-[300px] h-[533px] bg-[#151C2C] rounded-3xl overflow-hidden cursor-pointer group hover:scale-[1.02] transition-transform duration-300 shadow-lg border border-[#1A2235]"
+      className="group relative flex h-[533px] w-[300px] flex-col overflow-hidden border-4 border-white bg-surface text-left shadow-[8px_8px_0_0_#ff3333] transition-all duration-150 hover:-translate-x-[4px] hover:-translate-y-[4px] hover:shadow-[12px_12px_0_0_#ffffff] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
     >
-      {/* Thumbnail Image Placeholder */}
-      <div className="absolute inset-0 bg-gray-800">
-        {project.thumbnail ? (
-          <img 
-            src={project.thumbnail} 
-            alt={project.title} 
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-600 bg-[#0F1423]">
-            [Video Thumbnail]
-          </div>
-        )}
-      </div>
-
-      {/* Dark Overlay Gradient for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
-
-      {/* Text Content overlay */}
-      <div className="absolute top-8 left-6 pr-6">
-        <h4 className="text-3xl font-bold text-white leading-tight mb-2">
+      {/* Title block */}
+      <div className="border-b-4 border-white bg-base p-5">
+        <span className="text-xs font-bold uppercase tracking-widest text-accent">
+          [ {String(index).padStart(2, '0')} ]
+        </span>
+        <h4 className="mt-2 text-3xl font-black uppercase leading-[0.95] tracking-tighter">
           {project.title}
         </h4>
-        <p className="text-gray-300 text-sm font-medium">
+      </div>
+
+      {/* Thumbnail */}
+      <div className="relative flex-grow bg-surface">
+        {project.thumbnail ? (
+          <img
+            src={project.thumbnail}
+            alt={project.title}
+            className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-[repeating-linear-gradient(45deg,#111111,#111111_12px,#1a1a1a_12px,#1a1a1a_24px)] text-xs font-black uppercase tracking-widest text-white/40">
+            [ Video Thumbnail ]
+          </div>
+        )}
+
+        {/* Play button: always visible, flips colour on hover */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="flex h-16 w-16 items-center justify-center border-4 border-white bg-base text-white shadow-[4px_4px_0_0_#ffffff] transition-colors group-hover:bg-accent group-hover:text-black">
+            <Play size={28} strokeWidth={3} fill="currentColor" />
+          </span>
+        </div>
+      </div>
+
+      {/* Description block */}
+      <div className="border-t-4 border-white bg-white p-4">
+        <p className="text-xs font-black uppercase tracking-widest text-black">
           {project.description}
         </p>
       </div>
-
-      {/* Play Icon Indicator on Hover */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-white shadow-xl">
-          <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 5v14l11-7z"/>
-          </svg>
-        </div>
-      </div>
-    </div>
+    </button>
   );
 };
 

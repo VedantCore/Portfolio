@@ -1,120 +1,182 @@
 // src/components/Projects.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrowLeft, ArrowRight, X, Play } from 'lucide-react';
 import { portfolioData, niches } from '../constants/data';
 import ProjectCard from './ProjectCard';
+
+const pad = (n) => String(n).padStart(2, '0');
 
 const Projects = () => {
   const [activeNiche, setActiveNiche] = useState(niches[0]);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [previewVideo, setPreviewVideo] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const scrollRef = useRef(null);
-
-  const handleCompanyClick = (companyData) => {
-    setSelectedCompany(companyData);
-  };
 
   const closeCompanyModal = () => {
     setSelectedCompany(null);
-    setPreviewVideo(null); // Ensure video closes if modal closes
+    setPreviewVideo(null);
+    setActiveIndex(0);
   };
 
   const scroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = 320; // Width of card + gap
+      const scrollAmount = 340; // card width (300) + gap (40)
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     }
   };
 
+  // Track which card is nearest the left edge for the "01 / 03" counter
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setActiveIndex(Math.round(el.scrollLeft / 340));
+  }, []);
+
+  // Close modals with Escape
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      if (previewVideo) setPreviewVideo(null);
+      else if (selectedCompany) closeCompanyModal();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [previewVideo, selectedCompany]);
+
+  const companies = portfolioData[activeNiche] ?? [];
+  const total = selectedCompany?.projects.length ?? 0;
+
   return (
-    <section id="projects" className="py-16 bg-[#0B1120] text-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl font-bold text-center mb-10 tracking-wide">My Work</h2>
-        
-        {/* Niche Navigation */}
-        <div className="flex flex-wrap justify-center gap-4 mb-16">
-          {niches.map((niche) => (
+    <section id="work" className="min-h-screen border-b border-white/10 bg-base px-6 py-24 text-white md:px-12">
+      {/* Section Header */}
+      <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <h2 className="text-5xl font-black uppercase tracking-tighter md:text-7xl">My Work</h2>
+        <span className="text-xs font-bold uppercase tracking-widest text-accent">
+          [ {pad(niches.length)} Niches ]
+        </span>
+      </div>
+
+      {/* Niche Navigation */}
+      <div className="mb-16 flex flex-wrap gap-4">
+        {niches.map((niche) => {
+          const isActive = activeNiche === niche;
+          return (
             <button
               key={niche}
               onClick={() => setActiveNiche(niche)}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
-                activeNiche === niche 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-[#1A2235] text-gray-400 hover:bg-[#252F45]'
+              className={`border-2 border-white px-5 py-3 text-xs font-black uppercase tracking-widest transition-all duration-150 ${
+                isActive
+                  ? 'translate-x-[4px] translate-y-[4px] bg-accent text-black shadow-none'
+                  : 'bg-base text-white shadow-[4px_4px_0_0_#ffffff] hover:-translate-x-[2px] hover:-translate-y-[2px] hover:shadow-[6px_6px_0_0_#ff3333]'
               }`}
             >
               {niche}
             </button>
-          ))}
-        </div>
+          );
+        })}
+      </div>
 
-        {/* Company Boxes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {portfolioData[activeNiche]?.map((companyData, index) => (
-            <div 
-              key={index}
-              onClick={() => handleCompanyClick(companyData)}
-              className="bg-[#151C2C] p-10 rounded-2xl cursor-pointer hover:bg-[#1A2235] transition-colors flex flex-col items-center justify-center text-center group"
-            >
-              <div className="text-6xl mb-6">{companyData.logo}</div>
-              <h3 className="text-2xl font-semibold mb-2 group-hover:text-blue-400 transition-colors">{companyData.company}</h3>
-              <p className="text-gray-500 text-sm">{companyData.projects.length} Projects</p>
+      {/* Company Boxes */}
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {companies.map((companyData, index) => (
+          <button
+            key={companyData.company}
+            onClick={() => setSelectedCompany(companyData)}
+            className="group flex flex-col items-start gap-8 border-2 border-white bg-surface p-8 text-left shadow-[8px_8px_0_0_#ff3333] transition-all duration-150 hover:-translate-x-[4px] hover:-translate-y-[4px] hover:bg-accent hover:text-black hover:shadow-[12px_12px_0_0_#ffffff] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
+          >
+            <div className="flex w-full items-start justify-between">
+              <span className="flex h-20 w-20 items-center justify-center border-2 border-white bg-base text-5xl group-hover:border-black">
+                {companyData.logo}
+              </span>
+              <span className="text-xs font-black uppercase tracking-widest text-white/40 group-hover:text-black">
+                {pad(index + 1)}
+              </span>
             </div>
-          ))}
-          {portfolioData[activeNiche]?.length === 0 && (
-            <p className="col-span-full text-center text-gray-600 py-12">Projects coming soon...</p>
-          )}
-        </div>
+            <div className="w-full">
+              <h3 className="text-3xl font-black uppercase leading-none tracking-tighter">
+                {companyData.company}
+              </h3>
+              <p className="mt-3 border-t-2 border-white/20 pt-3 text-xs font-bold uppercase tracking-widest text-accent group-hover:border-black/30 group-hover:text-black">
+                {pad(companyData.projects.length)} Projects →
+              </p>
+            </div>
+          </button>
+        ))}
+
+        {companies.length === 0 && (
+          <p className="col-span-full border-2 border-dashed border-white/30 py-16 text-center text-sm font-black uppercase tracking-widest text-white/40">
+            [ Projects coming soon ]
+          </p>
+        )}
       </div>
 
       {/* Company Projects Modal (Horizontal Scroll) */}
       {selectedCompany && !previewVideo && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#070A14]/90 backdrop-blur-sm p-4">
-          <div className="bg-[#0B1120] rounded-3xl w-full max-w-6xl h-[80vh] flex flex-col relative border border-[#1A2235] shadow-2xl overflow-hidden">
-            
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4">
+          <div className="relative flex h-[85vh] w-full max-w-6xl flex-col border-4 border-white bg-base shadow-[12px_12px_0_0_#ff3333]">
             {/* Modal Header */}
-            <div className="px-8 py-6 flex justify-between items-center border-b border-[#1A2235]">
-              <h3 className="text-2xl font-bold">{selectedCompany.company}</h3>
-              <button 
+            <div className="flex items-stretch justify-between border-b-4 border-white bg-surface">
+              <div className="flex flex-col justify-center px-6 py-4 md:px-8">
+                <span className="text-xs font-bold uppercase tracking-widest text-accent">
+                  [ {activeNiche} ]
+                </span>
+                <h3 className="text-2xl font-black uppercase tracking-tighter md:text-4xl">
+                  {selectedCompany.company}
+                </h3>
+              </div>
+              <button
                 onClick={closeCompanyModal}
-                className="text-gray-500 hover:text-white text-4xl leading-none transition-colors"
+                aria-label="Close"
+                className="flex w-20 items-center justify-center border-l-4 border-white bg-accent text-black transition-colors hover:bg-white"
               >
-                &times;
+                <X size={32} strokeWidth={3} />
               </button>
             </div>
-            
+
             {/* Horizontal Scrolling Area */}
-            <div 
+            <div
               ref={scrollRef}
-              className="flex-grow flex gap-6 overflow-x-auto p-8 snap-x snap-mandatory hide-scrollbar items-center"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              onScroll={handleScroll}
+              className="brutal-scroll flex flex-grow snap-x snap-mandatory items-center gap-10 overflow-x-auto p-8"
             >
               {selectedCompany.projects.map((project, idx) => (
-                <div key={idx} className="snap-center shrink-0">
-                  <ProjectCard 
-                    project={project} 
-                    onClick={() => setPreviewVideo(project)} 
+                <div key={idx} className="shrink-0 snap-start">
+                  <ProjectCard
+                    project={project}
+                    index={idx + 1}
+                    onClick={() => setPreviewVideo(project)}
                   />
                 </div>
               ))}
             </div>
 
-            {/* Navigation Arrows */}
-            <div className="absolute bottom-8 right-8 flex gap-4">
-              <button 
-                onClick={() => scroll('left')}
-                className="w-12 h-12 rounded-full bg-[#1A2235] flex items-center justify-center text-white hover:bg-gray-700 transition-colors"
-              >
-                &#8592;
-              </button>
-              <button 
-                onClick={() => scroll('right')}
-                className="w-12 h-12 rounded-full bg-[#1A2235] flex items-center justify-center text-white hover:bg-gray-700 transition-colors"
-              >
-                &#8594;
-              </button>
+            {/* Footer: counter + arrows */}
+            <div className="flex items-stretch justify-between border-t-4 border-white bg-surface">
+              <div className="flex items-center px-6 text-sm font-black uppercase tracking-widest md:px-8">
+                <span className="text-accent">{pad(Math.min(activeIndex + 1, total))}</span>
+                <span className="mx-2 text-white/40">/</span>
+                <span>{pad(total)}</span>
+              </div>
+              <div className="flex">
+                <button
+                  onClick={() => scroll('left')}
+                  aria-label="Scroll left"
+                  className="flex h-16 w-16 items-center justify-center border-l-4 border-white bg-base text-white transition-colors hover:bg-white hover:text-black active:bg-accent"
+                >
+                  <ArrowLeft size={28} strokeWidth={3} />
+                </button>
+                <button
+                  onClick={() => scroll('right')}
+                  aria-label="Scroll right"
+                  className="flex h-16 w-16 items-center justify-center border-l-4 border-white bg-base text-white transition-colors hover:bg-accent hover:text-black active:bg-white"
+                >
+                  <ArrowRight size={28} strokeWidth={3} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -122,18 +184,23 @@ const Projects = () => {
 
       {/* Video Preview Modal */}
       {previewVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4 backdrop-blur-md">
-          <button 
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/95 p-4">
+          <button
             onClick={() => setPreviewVideo(null)}
-            className="absolute top-8 right-8 text-white text-4xl hover:text-gray-400 z-50"
+            aria-label="Close preview"
+            className="absolute right-6 top-6 z-10 flex h-14 w-14 items-center justify-center border-4 border-white bg-accent text-black shadow-[4px_4px_0_0_#ffffff] transition-all hover:bg-white active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
           >
-            &times;
+            <X size={28} strokeWidth={3} />
           </button>
-          <div className="w-full max-w-lg aspect-[9/16] bg-gray-900 rounded-xl overflow-hidden relative">
+          <div className="relative aspect-[9/16] max-h-[85vh] w-full max-w-sm border-4 border-white bg-surface shadow-[12px_12px_0_0_#ff3333]">
             {/* Replace with actual video player */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
-              <span className="text-6xl mb-4">▶️</span>
-              <p>Playing: {previewVideo.title}</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 text-center">
+              <span className="flex h-24 w-24 items-center justify-center border-4 border-white bg-accent text-black">
+                <Play size={44} strokeWidth={3} fill="currentColor" />
+              </span>
+              <p className="px-6 text-sm font-black uppercase tracking-widest">
+                Playing: {previewVideo.title}
+              </p>
             </div>
           </div>
         </div>
