@@ -1,159 +1,145 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+// src/components/Projects.jsx
+import React, { useState, useRef } from 'react';
+import { portfolioData, niches } from '../constants/data';
 import ProjectCard from './ProjectCard';
 
-const filters = ['ALL', 'AR & VR', 'ESPORTS', 'MARKETING'];
+const Projects = () => {
+  const [activeNiche, setActiveNiche] = useState(niches[0]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [previewVideo, setPreviewVideo] = useState(null);
+  const scrollRef = useRef(null);
 
-const projectsData = [
-  {
-    id: 1,
-    title: "Liminal XR Solutions",
-    category: "AR & VR",
-    year: "Oct 2024 - Nov 2024",
-    gridClass: "min-h-[300px] md:min-h-[400px] md:col-span-2 md:row-span-2",
-    color: "from-blue-900 to-indigo-900",
-    videoSrc: "https://www.w3schools.com/html/mov_bbb.mp4",
-    points: [
-      "Produced a dynamic showcase video for a major VI event in Delhi, collaborating with event coordinators to match the required tone.",
-      "Edited multiple videos highlighting immersive dome, VR, and AR experiences, significantly enhancing audience engagement.",
-      "Partnered with a specialized Mumbai-based agency to tailor visual content for complex virtual reality and augmented reality projects."
-    ]
-  },
-  {
-    id: 2,
-    title: "UES Esports",
-    category: "ESPORTS",
-    year: "May 2025 - Aug 2025",
-    gridClass: "min-h-[250px] md:col-span-1 md:row-span-1",
-    color: "from-purple-900 to-pink-900",
-    videoSrc: "https://www.w3schools.com/html/mov_bbb.mp4",
-    points: [
-      "Partnered closely with various content creators to enhance narrative storytelling and maximize viewer engagement.",
-      "Produced and edited a high-profile creator reveal video for the organization's YouTube channel.",
-      "Provided reliable technical support, creative guidance, and mentorship to team members across multiple concurrent projects."
-    ]
-  },
-  {
-    id: 3,
-    title: "4shan Digital",
-    category: "MARKETING",
-    year: "Jan 2024 - Mar 2025",
-    gridClass: "min-h-[250px] md:col-span-1 md:row-span-1",
-    color: "from-emerald-800 to-teal-900",
-    videoSrc: "https://www.w3schools.com/html/mov_bbb.mp4",
-    points: [
-      "Edited high-performing short-form and long-form video content for top-tier YouTube creators.",
-      "Managed end-to-end post-production workflows to ensure high-quality asset delivery within strict deadlines.",
-      "Supported broader marketing agency initiatives by seamlessly integrating video assets into cross-channel campaigns."
-    ]
-  }
-];
+  const handleCompanyClick = (companyData) => {
+    setSelectedCompany(companyData);
+  };
 
-export default function Projects() {
-  const [activeFilter, setActiveFilter] = useState('ALL');
-  const [selectedProject, setSelectedProject] = useState(null);
+  const closeCompanyModal = () => {
+    setSelectedCompany(null);
+    setPreviewVideo(null); // Ensure video closes if modal closes
+  };
 
-  const filteredProjects = projectsData.filter(project => 
-    activeFilter === 'ALL' ? true : project.category === activeFilter
-  );
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = 320; // Width of card + gap
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   return (
-    <section id="work" className="px-6 py-24 md:px-12 bg-base">
-      
-      {/* Filters */}
-      <div className="mb-16 flex flex-wrap justify-center gap-4">
-        {filters.map((filter) => (
-          <button
-            key={filter}
-            onClick={() => setActiveFilter(filter)}
-            className={`rounded-full border px-6 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
-              activeFilter === filter
-                ? 'border-white bg-white text-black'
-                : 'border-white/20 text-white/50 hover:border-white/50 hover:text-white'
-            }`}
-          >
-            {filter}
-          </button>
-        ))}
+    <section id="projects" className="py-16 bg-[#0B1120] text-white min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-4xl font-bold text-center mb-10 tracking-wide">My Work</h2>
+        
+        {/* Niche Navigation */}
+        <div className="flex flex-wrap justify-center gap-4 mb-16">
+          {niches.map((niche) => (
+            <button
+              key={niche}
+              onClick={() => setActiveNiche(niche)}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${
+                activeNiche === niche 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-[#1A2235] text-gray-400 hover:bg-[#252F45]'
+              }`}
+            >
+              {niche}
+            </button>
+          ))}
+        </div>
+
+        {/* Company Boxes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {portfolioData[activeNiche]?.map((companyData, index) => (
+            <div 
+              key={index}
+              onClick={() => handleCompanyClick(companyData)}
+              className="bg-[#151C2C] p-10 rounded-2xl cursor-pointer hover:bg-[#1A2235] transition-colors flex flex-col items-center justify-center text-center group"
+            >
+              <div className="text-6xl mb-6">{companyData.logo}</div>
+              <h3 className="text-2xl font-semibold mb-2 group-hover:text-blue-400 transition-colors">{companyData.company}</h3>
+              <p className="text-gray-500 text-sm">{companyData.projects.length} Projects</p>
+            </div>
+          ))}
+          {portfolioData[activeNiche]?.length === 0 && (
+            <p className="col-span-full text-center text-gray-600 py-12">Projects coming soon...</p>
+          )}
+        </div>
       </div>
 
-      {/* Bento Grid */}
-      <motion.div layout className="mx-auto grid max-w-7xl grid-cols-1 gap-4 md:grid-cols-3">
-        <AnimatePresence>
-          {filteredProjects.map((project) => (
-            <motion.div
-              key={project.id}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              className={project.gridClass}
-            >
-              <ProjectCard project={project} onClick={setSelectedProject} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Fullscreen Video Modal */}
-      <AnimatePresence>
-        {selectedProject && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSelectedProject(null)} 
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 md:p-12 backdrop-blur-sm"
-          >
-            <motion.div
-              layoutId={`card-container-${selectedProject.id}`}
-              onClick={(e) => e.stopPropagation()} 
-              className="relative w-full max-w-6xl overflow-hidden rounded-2xl bg-surface border border-white/10"
-            >
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedProject(null)}
-                className="absolute right-4 top-4 z-10 rounded-full bg-black/50 p-2 text-white transition-colors hover:bg-accent"
+      {/* Company Projects Modal (Horizontal Scroll) */}
+      {selectedCompany && !previewVideo && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#070A14]/90 backdrop-blur-sm p-4">
+          <div className="bg-[#0B1120] rounded-3xl w-full max-w-6xl h-[80vh] flex flex-col relative border border-[#1A2235] shadow-2xl overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="px-8 py-6 flex justify-between items-center border-b border-[#1A2235]">
+              <h3 className="text-2xl font-bold">{selectedCompany.company}</h3>
+              <button 
+                onClick={closeCompanyModal}
+                className="text-gray-500 hover:text-white text-4xl leading-none transition-colors"
               >
-                <X size={24} />
+                &times;
               </button>
+            </div>
+            
+            {/* Horizontal Scrolling Area */}
+            <div 
+              ref={scrollRef}
+              className="flex-grow flex gap-6 overflow-x-auto p-8 snap-x snap-mandatory hide-scrollbar items-center"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {selectedCompany.projects.map((project, idx) => (
+                <div key={idx} className="snap-center shrink-0">
+                  <ProjectCard 
+                    project={project} 
+                    onClick={() => setPreviewVideo(project)} 
+                  />
+                </div>
+              ))}
+            </div>
 
-              {/* Video Player */}
-              <div className="aspect-video w-full bg-black">
-                <video 
-                  src={selectedProject.videoSrc} 
-                  autoPlay 
-                  controls 
-                  className="h-full w-full object-cover"
-                />
-              </div>
+            {/* Navigation Arrows */}
+            <div className="absolute bottom-8 right-8 flex gap-4">
+              <button 
+                onClick={() => scroll('left')}
+                className="w-12 h-12 rounded-full bg-[#1A2235] flex items-center justify-center text-white hover:bg-gray-700 transition-colors"
+              >
+                &#8592;
+              </button>
+              <button 
+                onClick={() => scroll('right')}
+                className="w-12 h-12 rounded-full bg-[#1A2235] flex items-center justify-center text-white hover:bg-gray-700 transition-colors"
+              >
+                &#8594;
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-              {/* Modal Details with Bullet Points */}
-              <div className="p-8">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#d97736]">
-                  {selectedProject.category}
-                </span>
-                <h3 className="mt-2 text-3xl font-bold uppercase tracking-tight text-white">
-                  {selectedProject.title}
-                </h3>
-                
-                {/* Dynamically rendering the bullet points inside the modal */}
-                <ul className="mt-6 flex flex-col gap-3 text-sm text-white/70 max-w-3xl">
-                  {selectedProject.points.map((point, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <span className="text-accent mt-[2px] font-bold">/</span>
-                      <span className="leading-relaxed">{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+      {/* Video Preview Modal */}
+      {previewVideo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4 backdrop-blur-md">
+          <button 
+            onClick={() => setPreviewVideo(null)}
+            className="absolute top-8 right-8 text-white text-4xl hover:text-gray-400 z-50"
+          >
+            &times;
+          </button>
+          <div className="w-full max-w-lg aspect-[9/16] bg-gray-900 rounded-xl overflow-hidden relative">
+            {/* Replace with actual video player */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+              <span className="text-6xl mb-4">▶️</span>
+              <p>Playing: {previewVideo.title}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
-}
+};
+
+export default Projects;
